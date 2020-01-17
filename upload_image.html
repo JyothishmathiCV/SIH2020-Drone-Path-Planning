@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Upload!</title>
+    </head>
+    <body>
+        <h1>Upload File</h1>
+        <form action="http://127.0.0.1:5000/upload-image-multiple" method="POST" enctype="multipart/form-data">
+            <input type="file" name="files" id="files" multiple>
+            <label for="files">Select image</label>
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>
