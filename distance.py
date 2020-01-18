@@ -1,6 +1,7 @@
 from math import radians, cos, sin, asin, sqrt
 import json
 
+
 def haversine(lon1, lat1, lon2, lat2):
     """
     Calculate the great circle distance between two points 
@@ -23,24 +24,23 @@ def get_row_col(nrow,ncol,obj):
     col = int(ob)%ncol
     return row,col
 
-with open("./processing/master.json") as f:
-    data = f.read()
+def calculate(data):
+        nrows = int(data["nrow"])
+        ncols = int(data["ncol"])
+        points = data["children"]
 
-# data = { "nrow":20, "ncol":23, "children":[{"lat","long","cellno"}] }
-data = json.loads(data)
-nrows = int(data["nrow"])
-ncols = int(data["ncol"])
-points = data["children"]
+        dist_matrix = []
 
-dist_matrix = []
-
-for i in range(0,len(points)):
-    dist_matrix.append([])
-    irow,icol = get_row_col(nrows,ncols,points[i])
-    for j in range(0,len(points)):
-        if i!=j:
-            jrow,jcol = get_row_col(nrows,ncols,points[j])
-            dist_matrix[i].append(haversine(float(points[i]["long"]),float(points[i]["lat"]),float(points[j]["long"]),float(points[j]["lat"])))
-        else:
-            dist_matrix[i].append(0)
+        for i in range(0,len(points)):
+            dist_matrix.append([])
+            irow,icol = get_row_col(nrows,ncols,points[i])
+            for j in range(0,len(points)):
+                if i!=j:
+                    jrow,jcol = get_row_col(nrows,ncols,points[j])
+                    dist_matrix[i].append(haversine(float(points[i]["long"]),float(points[i]["lat"]),float(points[j]["long"]),float(points[j]["lat"])))
+                else:
+                    dist_matrix[i].append(0)
+                    
+        return dist_matrix
+            
 
