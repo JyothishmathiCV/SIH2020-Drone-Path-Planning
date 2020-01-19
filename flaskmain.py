@@ -3,6 +3,7 @@ from flask_restful import Resource, Api
 import os,json
 from distance import calculate
 from raw2json import process
+import algorithm
 
 app = Flask(__name__,static_folder="public")
 api = Api(app)  
@@ -32,14 +33,29 @@ class UploadMultiple(Resource):
             #os.system('Rscript sample.R CMD> output.txt')    
             matrix=calculate(process("output.txt"))
             f=open("public/"+diro+"/matrix.json","w")
-            f.write(json.dumps(matrix))   
+            f.write(json.dumps(matrix))  
+            f.close() 
             return {"image" : "public/"+diro+"/"+diro+".jpg"},200
         
         return {"about" : "FILE NOT SAVED"},403
+
+# INPUT JSON FORMAT :
+# {
+#     speed : "",
+#     life : "", //range
+#     filename : "",
+#     no_of_drones: xx,
+#     charging_points: [[row,column,cellno],....],
+# }
     
 class AlgorithmCallee(Resource):
-    
-    
+    def post(self):
+        data_json = request.get_json()
+        with open("public/"+data_json["filename"]+"/matrix.json","r") as f:
+            matrix = json.loads(f.read())
+        data_json["distance_matrix"] = matrix
+        algorithm.main(data_json)
+        return {"about" : "GOT IT!"}, 200
 
 
 api.add_resource(HelloWorld,'/')

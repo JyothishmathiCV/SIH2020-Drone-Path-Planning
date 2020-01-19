@@ -3,7 +3,13 @@ from __future__ import print_function
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 
-def create_data_model():
+    # speed = data_json["speed"]
+        # life = data_json["life"]
+        # filename = data_json["filename"]
+        # no_of_drones = data_json["no_of_drones"]
+        # charging_points = data_json["charging_points"]
+
+def create_data_model(data_json):
     """Stores the data for the problem."""
     data = {}
     data['distance_matrix'] = [
@@ -127,10 +133,10 @@ def print_solution(data, manager, routing, solution):
 
 
 
-def main():
+def main(data_json):
     """Solve the CVRP problem."""
     # Instantiate the data problem.
-    data = create_data_model()
+    data = create_data_model(data_json)
 
     # Create the routing index manager.
     manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
@@ -166,8 +172,8 @@ def main():
 
     # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-    search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+    search_parameters.first_solution_strategy = (routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+        
 
     # Solve the problem.
     solution = routing.SolveWithParameters(search_parameters)
@@ -178,4 +184,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    main(sys.argv[1])
