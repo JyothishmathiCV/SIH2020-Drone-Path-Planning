@@ -1,10 +1,7 @@
 OGR data source with driver: ESRI Shapefile 
-Source: "/root/Downloads/stations/something/dryland.shp", layer: "dryland"
+Source: "/root/sample4/SIH2020-Drone-Path-Planning/public/dryland/dryland.shp", layer: "dryland"
 with 1 features
 It has 16 fields
-[1] "Finding intersection points"
-[1] "successfully intersected"
-[1] "<><><>"
            [,1]        [,2]
 0 5   -64.27800   3.8130046
 0 6   -62.92740   3.6229519

@@ -18,4 +18,3 @@ def process(path):
     return master
 
 
-process("output.txt")

@@ -25,11 +25,11 @@ class UploadMultiple(Resource):
             print("Got it!!")
             for afile in files:
                 diro=afile.filename.split(".")[0]
-                if(not(os.path.isdir(diro))):
+                if(not(os.path.isdir("./public/"+diro))):
                     os.mkdir("./public/"+diro)
                 afile.save(os.path.join("public",diro,afile.filename))
-            os.system('Rscript sample.R> output.txt')
-            #TODO
+            os.system('Rscript sample.R > output.txt')
+            #TODOs
             #os.system('Rscript sample.R CMD> output.txt')    
             matrix=calculate(process("output.txt"))
             f=open("public/"+diro+"/matrix.json","w")
@@ -64,4 +64,4 @@ api.add_resource(AlgorithmCallee,'/call/<string:path>')
 # api.add_resource(Public,'/public/<string:path>')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')

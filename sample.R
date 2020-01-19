@@ -6,7 +6,7 @@ library(ggplot2)
 library(sf)
 library(lattice)
 
-dryland <- readOGR("/root/sample4/SIH2020-Drone-Path-Planning/dryland/dryland.shp", "dryland") 
+dryland <- readOGR("/root/sample4/SIH2020-Drone-Path-Planning/public/dryland/dryland.shp", "dryland") 
 
 grid <- raster(extent(dryland))
 
@@ -35,5 +35,4 @@ plot(dry.grid)
 
 print(grid_ctr)
 
-writeOGR(dry.grid, dsn=getwd(), layer="inters_shape", driver="ESRI Shapefile", overwrite_layer=T)
 
