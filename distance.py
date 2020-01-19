@@ -31,16 +31,19 @@ def calculate(data):
 
         dist_matrix = []
 
+        mapping_points = {} # Given the cellno get the index in the distance matrix
+
         for i in range(0,len(points)):
             dist_matrix.append([])
             irow,icol = get_row_col(nrows,ncols,points[i])
+            mapping_points[int(points[i]['cellno'])] = (irow,icol,i)
             for j in range(0,len(points)):
                 if i!=j:
-                    jrow,jcol = get_row_col(nrows,ncols,points[j])
-                    dist_matrix[i].append(haversine(float(points[i]["long"]),float(points[i]["lat"]),float(points[j]["long"]),float(points[j]["lat"])))
+                    # jrow,jcol = get_row_col(nrows,ncols,points[j])
+                    dist_matrix[i].append(haversine(float(points[j]["long"]),float(points[i]["lat"]),float(points[j]["long"]),float(points[j]["lat"])))
                 else:
                     dist_matrix[i].append(0)
                     
-        return dist_matrix
+        return dist_matrix,mapping_points,nrows,ncols
             
 

@@ -31,9 +31,9 @@ class UploadMultiple(Resource):
             os.system('Rscript sample.R > output.txt')
             #TODOs
             #os.system('Rscript sample.R CMD> output.txt')    
-            matrix=calculate(process("output.txt"))
+            matrix,mapping_points,nrows,ncols=calculate(process("output.txt"))
             f=open("public/"+diro+"/matrix.json","w")
-            f.write(json.dumps(matrix))  
+            f.write(json.dumps({'matrix': matrix, 'mapping_points': mapping_points,'nrows':nrows,'ncols':ncols}))  
             f.close() 
             return {"image" : "public/"+diro+"/"+diro+".jpg"},200
         
@@ -52,8 +52,9 @@ class AlgorithmCallee(Resource):
     def post(self):
         data_json = request.get_json()
         with open("public/"+data_json["filename"]+"/matrix.json","r") as f:
-            matrix = json.loads(f.read())
-        data_json["distance_matrix"] = matrix
+            data = json.loads(f.read())
+        data_json['mapping_points'] = data['mapping_points']
+        data_json["distance_matrix"] = data['matrix']
         algorithm.main(data_json)
         return {"about" : "GOT IT!"}, 200
 
@@ -61,6 +62,7 @@ class AlgorithmCallee(Resource):
 api.add_resource(HelloWorld,'/')
 api.add_resource(UploadMultiple,'/upload')
 api.add_resource(AlgorithmCallee,'/call/<string:path>')
+
 # api.add_resource(Public,'/public/<string:path>')
 
 if __name__ == "__main__":
