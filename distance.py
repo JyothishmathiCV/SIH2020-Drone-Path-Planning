@@ -44,6 +44,6 @@ def calculate(data):
                 else:
                     dist_matrix[i].append(0)
                     
-        return dist_matrix,mapping_points
+        return dist_matrix,mapping_points,nrows,ncols
             
 

@@ -39,23 +39,29 @@ def create_data_model(data_json):
     data['range_of_drone'] = data_json['life']
     data['speed'] = data_json['speed']
     data['depot'] = home_depot
+    data['no_of_rows'] = data_json['nrows']
+    data['no_of_cols'] = data_json['ncols']
     return data
+
+def convert_to_cellno(index):
+    return
 
 
 def print_solution(data, manager, routing, solution):
     """Prints solution on console."""
     max_route_distance = 0
+    routing_path = []
     for vehicle_id in range(data['num_vehicles']):
         index = routing.Start(vehicle_id)
         plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
         route_distance = 0
         ranged=data['range_of_drone']
         prev=data['depot']
+        routing_path.append([])
         while not routing.IsEnd(index):
             stationindex=data['depot']
-
-            
             plan_output += ' {} -> '.format(manager.IndexToNode(index))
+            manager.IndexToNode(index)
             ranged-=data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)]
             prev=index
             previous_index = index
