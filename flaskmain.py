@@ -55,6 +55,8 @@ class AlgorithmCallee(Resource):
             data = json.loads(f.read())
         data_json['mapping_points'] = data['mapping_points']
         data_json["distance_matrix"] = data['matrix']
+        data_json["nrows"] = data['nrows']
+        data_json["ncols"] = data['ncols']
         routing_path = algorithm.main(data_json)
         # TODO
         # Modify the return according to the image parameters
