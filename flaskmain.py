@@ -55,8 +55,10 @@ class AlgorithmCallee(Resource):
             data = json.loads(f.read())
         data_json['mapping_points'] = data['mapping_points']
         data_json["distance_matrix"] = data['matrix']
-        algorithm.main(data_json)
-        return {"about" : "GOT IT!"}, 200
+        routing_path = algorithm.main(data_json)
+        # TODO
+        # Modify the return according to the image parameters
+        return {"drone_routes" : routing_path, "width": 'xx', "height" : 'xx', "grid_size": 'xx',"image" : 'xx'}, 200
 
 
 api.add_resource(HelloWorld,'/')
