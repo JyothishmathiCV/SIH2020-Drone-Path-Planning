@@ -4,6 +4,7 @@ import os,json
 from distance import calculate
 from raw2json import process
 import algorithm
+from cvman import readNcrop
 
 app = Flask(__name__,static_folder="public")
 api = Api(app)  
@@ -28,14 +29,13 @@ class UploadMultiple(Resource):
                 if(not(os.path.isdir("./public/"+diro))):
                     os.mkdir("./public/"+diro)
                 afile.save(os.path.join("public",diro,afile.filename))
-            os.system('Rscript sample.R > output.txt')
-            #TODOs
-            #os.system('Rscript sample.R CMD> output.txt')    
+            os.system('Rscript grid_division.R '+os.path.abspath("./public/"+diro)+" "+diro+' > output.txt')
+            readNcrop(os.path.abspath("./public/"+diro),diro)
             matrix,mapping_points,nrows,ncols=calculate(process("output.txt"))
-            f=open("public/"+diro+"/matrix.json","w")
+            f=open("./public/"+diro+"/matrix.json","w")
             f.write(json.dumps({'matrix': matrix, 'mapping_points': mapping_points,'nrows':nrows,'ncols':ncols}))  
             f.close() 
-            return {"image" : "public/"+diro+"/"+diro+".jpg"},200
+            return {"image" : "public/"+diro+"/"+diro+"real.png"},200
         
         return {"about" : "FILE NOT SAVED"},403
 
