@@ -8,7 +8,6 @@ def process(path):
     with open(path) as f:
         content=f.read()
         arr=content.split("[,2]\n")[1].split("\n")
-        import pdb; pdb.set_trace()
         nrow,ncol=arr[len(arr)-1].split('"')[1].split(" ")
         master["nrow"]=nrow
         master["ncol"]=ncol
