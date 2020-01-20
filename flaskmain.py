@@ -17,6 +17,8 @@ class HelloWorld(Resource):
     def post(self):
         some_json = request.get_json()
         return {"you sent" : some_json}, 201
+    
+
 
 class UploadMultiple(Resource):
     def post(self):
@@ -28,8 +30,9 @@ class UploadMultiple(Resource):
                 diro=afile.filename.split(".")[0]
                 if(not(os.path.isdir("./public/"+diro))):
                     os.mkdir("./public/"+diro)
-                afile.save(os.path.join("public",diro,afile.filename))
-            os.system('Rscript grid_division.R '+os.path.abspath("./public/"+diro)+" "+diro+' > output.txt')
+                if(not(os.path.isfile("./public/"+diro+"/"+afile.filename))):
+                    afile.save(os.path.join("public",diro,afile.filename))
+            #os.system('Rscript grid_division.R '+os.path.abspath("./public/"+diro)+" "+diro+' > output.txt')
             readNcrop(os.path.abspath("./public/"+diro),diro)
             matrix,mapping_points,nrows,ncols=calculate(process("output.txt"))
             f=open("./public/"+diro+"/matrix.json","w")
@@ -67,7 +70,6 @@ api.add_resource(HelloWorld,'/')
 api.add_resource(UploadMultiple,'/upload')
 api.add_resource(AlgorithmCallee,'/call/<string:path>')
 
-# api.add_resource(Public,'/public/<string:path>')
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0')

@@ -1,7 +1,13 @@
+[1] "/root/sample4/SIH2020-Drone-Path-Planning/public/dryland"
+[1] "/root/sample4/SIH2020-Drone-Path-Planning/public/dryland/dryland.shp"
 OGR data source with driver: ESRI Shapefile 
 Source: "/root/sample4/SIH2020-Drone-Path-Planning/public/dryland/dryland.shp", layer: "dryland"
 with 1 features
 It has 16 fields
+null device 
+          1 
+null device 
+          1 
            [,1]        [,2]
 0 5   -64.27800   3.8130046
 0 6   -62.92740   3.6229519
@@ -231,3 +237,4 @@ It has 16 fields
 0 425 -52.99331 -31.6150949
 0 426 -51.74552 -30.9905771
 0 448 -53.06950 -33.1587528
+[1] "20 23"

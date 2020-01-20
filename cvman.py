@@ -6,12 +6,17 @@ def cropImage(img,top,bottom,right,left):
 
 
 def readNcrop(path,name):
-    inimg=cv2.imread(path+name+"grid.png")
-    cv2.threshold(inimg,200,255,cv2.THRESH_BINARY) 
+    inimg=cv2.imread(path+"/"+name+"grid.png",cv2.IMREAD_GRAYSCALE)
+    print(path+name+"grid.png")
+    print(inimg)
+    _,thresh1=cv2.threshold(inimg,200,255,cv2.THRESH_BINARY) 
+    print("=======================")
+    print(thresh1)
     left = 0 
     right = 0 
     top = 0 
     bottom = 0  
+    sh=inimg.shape
     sh0 = sh[0]//2 
     sh1 = sh[1]//2
     leng = []
@@ -22,16 +27,17 @@ def readNcrop(path,name):
     trans= thresh1.transpose()
     for j in range(len(trans)):
         if(trans[sh1][j] == 0):
-            wid.append(j)  
+            wid.append(j)
+              
     left=leng[0]
     right=leng[-1]
     bottom=wid[-1] 
     top=wid[0] 
-    outimg=cropImage(cv.imread(path+name+"out.png"),top,bottom,right,left)
-    h,w=outimg.shape
+    outimg=cropImage(cv2.imread(path+"/"+name+"out.png"),top,bottom,right,left)
+    h,w,c=outimg.shape
     scaledw=(w//h)*1080
     resized=cv2.resize(outimg,(scaledw,1080),interpolation = cv2.INTER_AREA) 
-    cv2.imwrite(path+name+"real.png",resized)   
+    cv2.imwrite(path+"/"+name+"real.png",resized)   
 
 
 
