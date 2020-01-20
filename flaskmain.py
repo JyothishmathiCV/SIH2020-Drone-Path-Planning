@@ -16,7 +16,16 @@ class HelloWorld(Resource):
         return {"about" : "Hello World!"}
     def post(self):
         some_json = request.get_json()
-        return {"you sent" : some_json}, 201
+        return {
+"drone_routes":[[[0,5],[0,6],[0,7],[0,8],[0,11],[0,5]],
+[[0,12],[1,3],[1,4],[1,5],[1,6],[0,12]],
+[[3,5],[3,6],[3,7],[3,8],[3,9],[3,5]],
+[[3,12],[3,13],[3,14],[3,15],[3,16],[3,12]]
+],
+"width":1080,
+"height":1080,
+"grid_size":[20,23]
+}, 200
     
 
 
@@ -32,7 +41,7 @@ class UploadMultiple(Resource):
                     os.mkdir("./public/"+diro)
                 if(not(os.path.isfile("./public/"+diro+"/"+afile.filename))):
                     afile.save(os.path.join("public",diro,afile.filename))
-            #os.system('Rscript grid_division.R '+os.path.abspath("./public/"+diro)+" "+diro+' > output.txt')
+            os.system('Rscript grid_division.R '+os.path.abspath("./public/"+diro)+" "+diro+' > output.txt')
             readNcrop(os.path.abspath("./public/"+diro),diro)
             matrix,mapping_points,nrows,ncols=calculate(process("output.txt"))
             f=open("./public/"+diro+"/matrix.json","w")
@@ -43,13 +52,7 @@ class UploadMultiple(Resource):
         return {"about" : "FILE NOT SAVED"},403
 
 # INPUT JSON FORMAT :
-# {
-#     speed : "",
-#     life : "", //range
-#     filename : "",
-#     no_of_drones: xx,
-#     charging_points: [[row,column,cellno],....],
-# }
+
     
 class AlgorithmCallee(Resource):
     def post(self):
@@ -68,7 +71,7 @@ class AlgorithmCallee(Resource):
 
 api.add_resource(HelloWorld,'/')
 api.add_resource(UploadMultiple,'/upload')
-api.add_resource(AlgorithmCallee,'/call/<string:path>')
+api.add_resource(AlgorithmCallee,'/call')
 
 
 if __name__ == "__main__":

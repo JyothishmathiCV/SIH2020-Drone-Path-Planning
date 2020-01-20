@@ -16,25 +16,30 @@ def create_data_model(data_json):
     mapping_points = data_json['mapping_points']
     charging_points = []
     #Home depot is the first charging point - by default
-    home_depot = data_json['mapping_points'][data_json['charging_points'][0]['cellno']]
+    access=data_json['charging_points'][0][2]
+    print(data_json['mapping_points']['151'][2])
+    home_depot = data_json['mapping_points'][str(access)][2]
     
     for i in data_json['charging_points']: # This will give the index of the charging point in the distance matrix
-        charging_points.append(data_json['mapping_points'][i['cellno']])
+        charging_points.append(data_json['mapping_points'][str(i[2])][2])
     
-    dist = data['distance_matrix']
-    
+    # dist = data['distance_matrix']
     #Deleting all the charging point columns in the distance matrix
+    dist = []
     for i in range(0,len(data['distance_matrix'])):
         dist.append([])
         for j in range(0,len(data['distance_matrix'][i])):
             if j not in charging_points:
-                dist[i].append(data['distance_matrix'][i][j])
-
+                dist[i].append(int(data['distance_matrix'][i][j]))
+            else:
+                if int(j)==int(home_depot):
+                    dist[i].append(int(data['distance_matrix'][i][j]))
     charging_station = []
-
     dist2 = []
     k = 0
     # ncs = -1
+    print(len(dist))
+    
     for i in range(0,len(dist)):
         if i in charging_points:
             if i == home_depot:
@@ -44,7 +49,7 @@ def create_data_model(data_json):
                 k += 1   
             else:
                 charging_station.append(dist[i])
-                modify_mapping_point(mapping_points,i,-charging_points.index(i)-1)
+                mapping_points = modify_mapping_point(mapping_points,i,-charging_points.index(i)-1)
                 # ncs -= 1
         else:
             dist2.append(dist[i])
@@ -54,12 +59,12 @@ def create_data_model(data_json):
     data['distance_matrix'] = dist2
     data['charging_station'] = charging_station #Copy the values to data from data_json
     data['mapping_points'] = mapping_points
-    data['num_vehicles'] = data_json['no_of_drones']
-    data['range_of_drone'] = data_json['life']
-    data['speed'] = data_json['speed']
-    data['depot'] = home_depot
-    data['no_of_rows'] = data_json['nrows']
-    data['no_of_cols'] = data_json['ncols']
+    data['num_vehicles'] = int(data_json['no_of_drones'])
+    data['range_of_drone'] = int(data_json['life'])
+    data['speed'] = int(data_json['speed'])
+    data['depot'] = int(home_depot)
+    data['no_of_rows'] = int(data_json['nrows'])
+    data['no_of_cols'] = int(data_json['ncols'])
     return data
 
 def convert_to_cellno(data,index):
@@ -81,6 +86,7 @@ def modify_mapping_point(mapping_points,pindex,cindex):
 
 def print_solution(data, manager, routing, solution):
     """Prints solution on console."""
+    import pdb; pdb.set_trace()
     max_route_distance = 0
     routing_path = []
     k = -1
@@ -93,7 +99,7 @@ def print_solution(data, manager, routing, solution):
         routing_path.append([])
         k+=1
         while not routing.IsEnd(index):
-            stationindex=data['depot']
+            stationindex=0
             plan_output += ' {} -> '.format(manager.IndexToNode(index))
             irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(index))
             routing_path[k].append([irow,icol,icellno]) 
@@ -132,13 +138,14 @@ def main(data_json):
     data = create_data_model(data_json)
 
     # Create the routing index manager.
-    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
-                                           data['num_vehicles'], data['depot'])
+    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),data['num_vehicles'], data['depot'])
 
     # Create Routing Model.
     routing = pywrapcp.RoutingModel(manager)
-
-
+    
+    print(len(data['distance_matrix']))
+    print(len(data['distance_matrix'][0]))
+    
     # Create and register a transit callback.
     def distance_callback(from_index, to_index):
         """Returns the distance between the two nodes."""
@@ -157,7 +164,7 @@ def main(data_json):
     routing.AddDimension(
         transit_callback_index,
         0,  # no slack
-        2000,  # vehicle maximum travel distance
+        255748270,  # vehicle maximum travel distance
         True,  # start cumul to zero
         dimension_name)
     distance_dimension = routing.GetDimensionOrDie(dimension_name)
@@ -174,6 +181,9 @@ def main(data_json):
     # Print solution on console.
     if solution:
         return print_solution(data, manager, routing, solution)
+    else:
+        print("Nadada")
+        return "No solution !!"
 
 
 

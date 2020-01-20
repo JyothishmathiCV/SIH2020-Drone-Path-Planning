@@ -20,7 +20,7 @@ grid <- raster(extent(dryland))
 
 # Create an empty raster.
 
-res(grid) <- 2
+res(grid) <-  0.0960961
 
 # Make the grid have the same coordinate reference system (CRS) as the shapefile.
 proj4string(grid)<-proj4string(dryland)
@@ -52,7 +52,7 @@ dev.off()
 print(grid_ctr)
 
 
-print(paste(attr(raster(grid),"nrow"),attr(raster(grid),"ncol"),sep=""))
+print(paste(attr(raster(grid),"nrow"),attr(raster(grid),"ncol"),sep=" "))
 
 
 

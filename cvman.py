@@ -35,7 +35,9 @@ def readNcrop(path,name):
     top=wid[0] 
     outimg=cropImage(cv2.imread(path+"/"+name+"out.png"),top,bottom,right,left)
     h,w,c=outimg.shape
-    scaledw=(w//h)*1080
+    print(h,w,c)
+    scaledw=int((w/h)*1080)
+    print(scaledw)
     resized=cv2.resize(outimg,(scaledw,1080),interpolation = cv2.INTER_AREA) 
     cv2.imwrite(path+"/"+name+"real.png",resized)   
 

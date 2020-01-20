@@ -8,9 +8,10 @@ def process(path):
     with open(path) as f:
         content=f.read()
         arr=content.split("[,2]\n")[1].split("\n")
-        nrow,ncol=arr[len(arr)-1].split('"')[1].split(" ")
+        nrow,ncol=arr[len(arr)-2].split('"')[1].split(" ")
         master["nrow"]=nrow
         master["ncol"]=ncol
+        arr.pop()
         arr.pop()
         for items in arr:
             al=re.findall(r'[\-0\.-9]+\s*',items)
