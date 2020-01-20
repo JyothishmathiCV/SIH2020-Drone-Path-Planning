@@ -13,7 +13,7 @@ def create_data_model(data_json):
     """Stores the data for the problem."""
     data = {}
     data['distance_matrix'] = data_json['distance_matrix']
-
+    mapping_points = data_json['mapping_points']
     charging_points = []
     #Home depot is the first charging point - by default
     home_depot = data_json['mapping_points'][data_json['charging_points'][0]['cellno']]
@@ -21,20 +21,39 @@ def create_data_model(data_json):
     for i in data_json['charging_points']: # This will give the index of the charging point in the distance matrix
         charging_points.append(data_json['mapping_points'][i['cellno']])
     
-    for i,j in enumerate(data['distance_matrix']):
-        for k in charging_points:
-            if k != home_depot:
-                del data['distance_matrix'][i][k]    #Deleting all the charging point columns in the distance matrix
+    dist = data['distance_matrix']
+    
+    #Deleting all the charging point columns in the distance matrix
+    for i in range(0,len(data['distance_matrix'])):
+        dist.append([])
+        for j in range(0,len(data['distance_matrix'][i])):
+            if j not in charging_points:
+                dist[i].append(data['distance_matrix'][i][j])
 
     charging_station = []
 
-    for k in charging_points:
-        charging_station.append(data['distance_matrix'][k])  #Assigning the distance of every point to the charging station
-        if k!=home_depot:
-            del data['distance_matrix'][k]  #Deleting the charging point rows in the distance matrix          
-    
+    dist2 = []
+    k = 0
+    # ncs = -1
+    for i in range(0,len(dist)):
+        if i in charging_points:
+            if i == home_depot:
+                charging_station.append(dist[i])
+                dist2.append(dist[i])
+                mapping_points = modify_mapping_point(mapping_points,i,k)
+                k += 1   
+            else:
+                charging_station.append(dist[i])
+                modify_mapping_point(mapping_points,i,-charging_points.index(i)-1)
+                # ncs -= 1
+        else:
+            dist2.append(dist[i])
+            mapping_points = modify_mapping_point(mapping_points,i,k)
+            k += 1       
+
+    data['distance_matrix'] = dist2
     data['charging_station'] = charging_station #Copy the values to data from data_json
-    data['mapping_points'] = data_json['mapping_points']
+    data['mapping_points'] = mapping_points
     data['num_vehicles'] = data_json['no_of_drones']
     data['range_of_drone'] = data_json['life']
     data['speed'] = data_json['speed']
@@ -43,14 +62,28 @@ def create_data_model(data_json):
     data['no_of_cols'] = data_json['ncols']
     return data
 
-def convert_to_cellno(index):
-    return
+def convert_to_cellno(data,index):
+    # nrows = data['no_of_rows']
+    # ncols = data['no_of_cols']
+    mapping = data['mapping_points']
+    for cellno in mapping:
+        if mapping[cellno][2] == index:
+            return mapping[cellno][0],mapping[cellno][1],cellno
+    return -1,-1,-1
+
+def modify_mapping_point(mapping_points,pindex,cindex):
+    for cellno in mapping_points:
+        if(mapping_points[cellno][2] == pindex):
+            mapping_points[cellno][2] == cindex
+            return mapping_points
+    return False
 
 
 def print_solution(data, manager, routing, solution):
     """Prints solution on console."""
     max_route_distance = 0
     routing_path = []
+    k = -1
     for vehicle_id in range(data['num_vehicles']):
         index = routing.Start(vehicle_id)
         plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
@@ -58,10 +91,12 @@ def print_solution(data, manager, routing, solution):
         ranged=data['range_of_drone']
         prev=data['depot']
         routing_path.append([])
+        k+=1
         while not routing.IsEnd(index):
             stationindex=data['depot']
             plan_output += ' {} -> '.format(manager.IndexToNode(index))
-            manager.IndexToNode(index)
+            irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(index))
+            routing_path[k].append([irow,icol,icellno]) 
             ranged-=data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)]
             prev=index
             previous_index = index
@@ -72,6 +107,8 @@ def print_solution(data, manager, routing, solution):
                     stationindex=i
             if ranged <= data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)] + data["charging_station"][stationindex][manager.IndexToNode(index)]:
                 plan_output += '  {}  Charging -> '.format(manager.IndexToNode(stationindex))
+                irow,icol,icellno = convert_to_cellno(data,-manager.IndexToNode(stationindex)-1)
+                routing_path[k].append([irow,icol,icellno])
                 ranged=data['range_of_drone']-data["charging_station"][stationindex][manager.IndexToNode(index)]
                 # TODO
                 # Modify distance covered by the drone in reaching the charging point and returning back - route_distance
@@ -82,7 +119,9 @@ def print_solution(data, manager, routing, solution):
         plan_output += 'Distance of the route: {}m\n'.format(route_distance)
         # print(plan_output)
         max_route_distance = max(route_distance, max_route_distance)
+
     print('Maximum of the route distances: {}m'.format(max_route_distance))
+    return routing_path
 
 
 
@@ -134,7 +173,8 @@ def main(data_json):
 
     # Print solution on console.
     if solution:
-        print_solution(data, manager, routing, solution)
+        return print_solution(data, manager, routing, solution)
+
 
 
 if __name__ == '__main__':
