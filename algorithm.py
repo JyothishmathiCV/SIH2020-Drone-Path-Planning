@@ -15,49 +15,63 @@ def create_data_model(data_json):
     data['distance_matrix'] = data_json['distance_matrix']
     mapping_points = data_json['mapping_points']
     charging_points = []
+    cost_to_charge = []
     #Home depot is the first charging point - by default
-    access=data_json['charging_points'][0][2]
-    print(data_json['mapping_points']['151'][2])
-    home_depot = data_json['mapping_points'][str(access)][2]
+    # access=data_json['charging_points'][0]
+    # print(data_json['mapping_points']['151'][2])
+    # home_depot = data_json['mapping_points'][str(access)][2]
     
     for i in data_json['charging_points']: # This will give the index of the charging point in the distance matrix
-        charging_points.append(data_json['mapping_points'][str(i[2])][2])
+        charging_points.append(data_json['mapping_points'][str(i)][2])
     
     # dist = data['distance_matrix']
     #Deleting all the charging point columns in the distance matrix
-    dist = []
-    for i in range(0,len(data['distance_matrix'])):
-        dist.append([])
-        for j in range(0,len(data['distance_matrix'][i])):
-            if j not in charging_points:
-                dist[i].append(int(data['distance_matrix'][i][j]))
-            else:
-                if int(j)==int(home_depot):
-                    dist[i].append(int(data['distance_matrix'][i][j]))
+    # dist = []
+    # for i in range(0,len(data['distance_matrix'])):
+    #     dist.append([])
+    #     for j in range(0,len(data['distance_matrix'][i])):
+    #         if j not in charging_points:
+    #             dist[i].append(int(data['distance_matrix'][i][j]))
+    #         else:
+    #             if int(j)==int(home_depot):
+    #                 dist[i].append(int(data['distance_matrix'][i][j]))
     charging_station = []
-    dist2 = []
-    k = 0
-    # ncs = -1
-    print(len(dist))
-    
-    for i in range(0,len(dist)):
-        if i in charging_points:
-            if i == home_depot:
-                charging_station.append(dist[i])
-                dist2.append(dist[i])
-                mapping_points = modify_mapping_point(mapping_points,i,k)
-                k += 1   
-            else:
-                charging_station.append(dist[i])
-                mapping_points = modify_mapping_point(mapping_points,i,-charging_points.index(i)-1)
-                # ncs -= 1
-        else:
-            dist2.append(dist[i])
-            mapping_points = modify_mapping_point(mapping_points,i,k)
-            k += 1       
+    for i in charging_points:
+        charging_station.append(data_json['mapping_points'][str(i)][2])
+    home_depot = charging_station[0]
 
-    data['distance_matrix'] = dist2
+    distance_matrix = data_json['distance_matrix']
+
+    for i in range(0,len(distance_matrix)):
+        mind = distance_matrix[home_depot][i]
+        for j in charging_station:
+            if mind > distance_matrix[i][j]:
+                mind = distance_matrix[i][j]
+        cost_to_charge.append(mind)
+    # dist2 = []
+    # k = 0
+    # ncs = -1
+    # print(len(dist))
+    
+    # for i in range(0,len(dist)):
+    #     if i in charging_points:
+    #         if i == home_depot:
+    #             charging_station.append(dist[i])
+    #             dist2.append(dist[i])
+    #             mapping_points = modify_mapping_point(mapping_points,i,k)
+    #             k += 1   
+    #         else:
+    #             charging_station.append(dist[i])
+    #             mapping_points = modify_mapping_point(mapping_points,i,-charging_points.index(i)-1)
+    #             # ncs -= 1
+    #     else:
+    #         dist2.append(dist[i])
+    #         mapping_points = modify_mapping_point(mapping_points,i,k)
+    #         k += 1       
+
+    data['distance_matrix'] = data_json['distance_matrix']
     data['charging_station'] = charging_station #Copy the values to data from data_json
+    data['cost_to_charge'] = cost_to_charge
     data['mapping_points'] = mapping_points
     data['num_vehicles'] = int(data_json['no_of_drones'])
     data['range_of_drone'] = int(data_json['life'])
@@ -86,7 +100,7 @@ def modify_mapping_point(mapping_points,pindex,cindex):
 
 def print_solution(data, manager, routing, solution):
     """Prints solution on console."""
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     max_route_distance = 0
     routing_path = []
     k = -1
@@ -99,7 +113,7 @@ def print_solution(data, manager, routing, solution):
         routing_path.append([])
         k+=1
         while not routing.IsEnd(index):
-            stationindex=0
+            stationindex=data['charging_station'][0]
             plan_output += ' {} -> '.format(manager.IndexToNode(index))
             irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(index))
             routing_path[k].append([irow,icol,icellno]) 
@@ -108,22 +122,25 @@ def print_solution(data, manager, routing, solution):
             previous_index = index
             index = solution.Value(routing.NextVar(index)) #Index = next node, prev = previous node
             # Decide if we have to go to the charging point or not
-            for i,j in enumerate(data["charging_station"]):
-                if data["charging_station"][i][manager.IndexToNode(index)] < data["charging_station"][stationindex][manager.IndexToNode(index)]:
+            for i in data["charging_station"]:
+                if data["distance_matrix"][i][manager.IndexToNode(index)] < data["distance_matrix"][stationindex][manager.IndexToNode(index)]:
                     stationindex=i
-            if ranged <= data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)] + data["charging_station"][stationindex][manager.IndexToNode(index)]:
+            if ranged <= data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)] + data["distance_matrix"][stationindex][manager.IndexToNode(index)]:
                 plan_output += '  {}  Charging -> '.format(manager.IndexToNode(stationindex))
-                irow,icol,icellno = convert_to_cellno(data,-manager.IndexToNode(stationindex)-1)
+                irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(stationindex))
                 routing_path[k].append([irow,icol,icellno])
-                ranged=data['range_of_drone']-data["charging_station"][stationindex][manager.IndexToNode(index)]
+                ranged=data['range_of_drone']-data["distance_matrix"][stationindex][manager.IndexToNode(index)]
+                route_distance += data["distance_matrix"][stationindex][manager.IndexToNode(index)] * 2
                 # TODO
                 # Modify distance covered by the drone in reaching the charging point and returning back - route_distance
-
-            route_distance += routing.GetArcCostForVehicle(previous_index, index, vehicle_id)
+            else:
+                route_distance += data['distance_matrix'][manager.IndexToNode(previous_index)][manager.IndexToNode(index)] #routing.GetArcCostForVehicle(previous_index, index, vehicle_id)
             
         plan_output += '{}\n'.format(manager.IndexToNode(index))
+        irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(index))
+        routing_path[k].append([irow,icol,icellno]) 
         plan_output += 'Distance of the route: {}m\n'.format(route_distance)
-        # print(plan_output)
+        print(plan_output)
         max_route_distance = max(route_distance, max_route_distance)
 
     print('Maximum of the route distances: {}m'.format(max_route_distance))
@@ -152,7 +169,7 @@ def main(data_json):
         # Convert from routing variable Index to distance matrix NodeIndex.
         from_node = manager.IndexToNode(from_index)
         to_node = manager.IndexToNode(to_index)
-        return data['distance_matrix'][from_node][to_node]
+        return data['distance_matrix'][from_node][to_node] + int(0.5*(data['cost_to_charge'][from_node]+data['cost_to_charge'][to_node]))
 
     transit_callback_index = routing.RegisterTransitCallback(distance_callback)
 
@@ -164,7 +181,7 @@ def main(data_json):
     routing.AddDimension(
         transit_callback_index,
         0,  # no slack
-        255748270,  # vehicle maximum travel distance
+        25574,  # vehicle maximum travel distance
         True,  # start cumul to zero
         dimension_name)
     distance_dimension = routing.GetDimensionOrDie(dimension_name)

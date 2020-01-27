@@ -40,7 +40,7 @@ def calculate(data):
             for j in range(0,len(points)):
                 if i!=j:
                     # jrow,jcol = get_row_col(nrows,ncols,points[j])
-                    dist_matrix[i].append(haversine(float(points[j]["long"]),float(points[i]["lat"]),float(points[j]["long"]),float(points[j]["lat"])))
+                    dist_matrix[i].append(haversine(float(points[i]["long"]),float(points[i]["lat"]),float(points[j]["long"]),float(points[j]["lat"])))
                 else:
                     dist_matrix[i].append(0)
                     
