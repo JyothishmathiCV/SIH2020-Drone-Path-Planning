@@ -116,7 +116,7 @@ def print_solution(data, manager, routing, solution):
             stationindex=data['charging_station'][0]
             plan_output += ' {} -> '.format(manager.IndexToNode(index))
             irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(index))
-            routing_path[k].append([irow,icol,icellno]) 
+            routing_path[k].append([irow,icol,route_distance]) 
             ranged-=data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)]
             prev=index
             previous_index = index
@@ -128,7 +128,7 @@ def print_solution(data, manager, routing, solution):
             if ranged <= data["distance_matrix"][manager.IndexToNode(prev)][manager.IndexToNode(index)] + data["distance_matrix"][stationindex][manager.IndexToNode(index)]:
                 plan_output += '  {}  Charging -> '.format(manager.IndexToNode(stationindex))
                 irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(stationindex))
-                routing_path[k].append([irow,icol,icellno])
+                routing_path[k].append([irow,icol,route_distance])
                 ranged=data['range_of_drone']-data["distance_matrix"][stationindex][manager.IndexToNode(index)]
                 route_distance += data["distance_matrix"][stationindex][manager.IndexToNode(index)] * 2
                 # TODO
@@ -138,7 +138,7 @@ def print_solution(data, manager, routing, solution):
             
         plan_output += '{}\n'.format(manager.IndexToNode(index))
         irow,icol,icellno = convert_to_cellno(data,manager.IndexToNode(index))
-        routing_path[k].append([irow,icol,icellno]) 
+        routing_path[k].append([irow,icol,route_distance]) 
         plan_output += 'Distance of the route: {}m\n'.format(route_distance)
         print(plan_output)
         max_route_distance = max(route_distance, max_route_distance)
